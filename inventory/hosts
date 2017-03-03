@@ -1,0 +1,17 @@
+[us-east-1-demo1]
+us-east-1-demo1
+
+[us-east-1-demos:children]
+us-east-1-demo1
+
+[us-east-1:children]
+us-east-1-demos
+
+[ec2:children]
+us-east-1
+
+[demos:children]
+us-east-1-demos
+
+[debian:children]
+demos
