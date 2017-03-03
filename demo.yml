@@ -66,6 +66,18 @@
       with_items: "{{ ec2_info.tagged_instances }}"
       when: "{{ ec2_info.changed }}"
 
+    - name: Create Route53 CNAME
+      route53:
+        command: create
+        zone: "{{ r53_zone }}"
+        record: "{{ r53_record }}"
+        type: CNAME
+        ttl: 300
+        value: "{{ ec2_info.tagged_instances[0].public_dns_name }}"
+      when:
+        - r53_zone is defined
+        - r53_record is defined
+
 - hosts: demos
   gather_facts: yes
   become: yes
