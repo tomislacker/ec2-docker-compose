@@ -72,6 +72,11 @@
 
   vars:
     ansible_python_interpreter: "/usr/bin/env python2.7"
+    deploy_src_zip: ./docker-gateway-api-test.zip
+    deploy_zip: /tmp/deploy.zip
+    deploy_tmp: /tmp/deploy
+    docker_compose_version: 1.11.2
+    docker_compose_url: "https://github.com/docker/compose/releases/download/1.11.2/docker-compose-{{ ansible_system }}-{{ ansible_architecture }}"
 
   pre_tasks:
     - action: ec2_facts
@@ -87,6 +92,7 @@
         - ca-certificates
         - curl
         - software-properties-common
+        - unzip
 
     - name: Install docker apt-key
       apt_key:
@@ -104,10 +110,78 @@
         name: docker-ce
         state: present
 
+    - name: Install pip
+      easy_install:
+        name: pip
+        state: latest
+
+    - name: Install Python dependencies for docker
+      pip:
+        name: "{{ item }}"
+      with_items:
+        - docker
+
     - name: Add admin user to docker group
       user:
         name: admin
         groups: docker
         append: yes
+
+    - name: Copy deployment zip
+      copy:
+        src: "{{ deploy_src_zip }}"
+        dest: "{{ deploy_zip }}"
+        owner: admin
+        group: admin
+        mode: 0644
+
+    - name: Create deployment directory
+      file:
+        path: "{{ deploy_tmp }}"
+        state: directory
+        owner: admin
+        group: admin
+        mode: 0775
+
+    - name: Extract zip
+      unarchive:
+        src: "{{ deploy_zip }}"
+        remote_src: yes
+        dest: "{{ deploy_tmp }}"
+
+    - name: Build API container
+      command: docker build --no-cache --tag tko_gateway_api_test .
+      args:
+        chdir: "{{ deploy_tmp }}"
+      register: build_image
+
+    - name: Install docker-compose
+      get_url:
+        url: "{{ docker_compose_url }}"
+        dest: /usr/bin/docker-compose
+        owner: root
+        group: root
+        mode: 0755
+
+    - name: Install docker-compose service unit
+      template:
+        src: etc/systemd/system/docker-compose.service
+        remote_src: yes
+        dest: /etc/systemd/system/docker-compose.service
+        owner: root
+        group: root
+        mode: 0644
+      register: service_unit
+
+    - name: systemctl daemon-reload
+      command: systemctl daemon-reload
+      when: service_unit.changed
+
+    - name: Restart docker-compose service
+      service:
+        name: docker-compose
+        state: restarted
+        enabled: yes
+      when: service_unit.changed or build_image.changed
 
 # vim: ft=ansible

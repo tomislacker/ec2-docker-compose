@@ -1,0 +1,17 @@
+# This service is actually a systemd target,
+# but we are using a service since targets cannot be reloaded.
+
+[Unit]
+Description=docker-compose service
+After=network.target
+
+[Service]
+Type=simple
+RemainAfterExit=yes
+ExecStart=/usr/bin/docker-compose up
+ExecReload=/usr/bin/docker-compose up
+ExecStop=/usr/bin/docker-compose down
+WorkingDirectory={{ deploy_tmp }}
+
+[Install]
+WantedBy=multi-user.target
