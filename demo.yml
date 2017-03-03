@@ -106,6 +106,7 @@
         - curl
         - software-properties-common
         - unzip
+        - python-setuptools
 
     - name: Install docker apt-key
       apt_key:
