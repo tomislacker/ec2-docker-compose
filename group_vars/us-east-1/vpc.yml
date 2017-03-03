@@ -1,0 +1,9 @@
+---
+vpc_id: vpc-c8deaeaf
+vpc_subnets:
+  a: subnet-3fc83376
+  b: subnet-c4d7df9c
+  d: subnet-fe717ad4
+  e: subnet-e0f7e4dd
+
+# vim: ft=ansible

@@ -1,0 +1,4 @@
+---
+ec2_keypair: ben@paradigm
+
+# vim: ft=ansible
