@@ -71,6 +71,7 @@
         command: create
         zone: "{{ r53_zone }}"
         record: "{{ r53_record }}"
+        overwrite: yes
         type: CNAME
         ttl: 300
         value: "{{ ec2_info.tagged_instances[0].public_dns_name }}"
