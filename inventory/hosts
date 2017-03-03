@@ -7,6 +7,9 @@ us-east-1-demo1
 [us-east-1:children]
 us-east-1-demos
 
+[us-east-1:vars]
+aws_region=us-east-1
+
 [ec2:children]
 us-east-1
 
