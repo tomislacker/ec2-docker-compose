@@ -78,6 +78,36 @@
     - wait_for: path=/var/log/cloud-init.log state=present search_regex=final
 
   tasks:
-      - debug: msg=Yay
+    - name: Install docker prereqs
+      apt:
+        name: "{{ item }}"
+        state: present
+      with_items:
+        - apt-transport-https
+        - ca-certificates
+        - curl
+        - software-properties-common
+
+    - name: Install docker apt-key
+      apt_key:
+        id: 0EBFCD88
+        url: https://download.docker.com/linux/debian/gpg
+        state: present
+
+    - name: Install docker repository
+      apt_repository:
+        repo: "deb [arch=amd64] https://download.docker.com/linux/debian {{ ansible_distribution_release }} stable"
+        state: present
+
+    - name: Install docker
+      apt:
+        name: docker-ce
+        state: present
+
+    - name: Add admin user to docker group
+      user:
+        name: admin
+        groups: docker
+        append: yes
 
 # vim: ft=ansible
